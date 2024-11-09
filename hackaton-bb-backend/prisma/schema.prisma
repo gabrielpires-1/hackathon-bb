@@ -1,0 +1,66 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Container {
+  id         String @id @default(uuid())
+  maxStorage Int
+}
+
+model Donation {
+  id          String         @id @default(uuid())
+  totalPoints Int
+  user        User           @relation(fields: [userId], references: [id])
+  items       DonationItem[]
+  userId      String
+  date        DateTime
+  isFinished  Boolean        @default(false)
+}
+
+model Item {
+  id          String         @id @default(uuid())
+  title       String
+  description String
+  points      Int
+  weight      Int
+  donations   DonationItem[]
+  img         String?
+}
+
+model DonationItem {
+  id         String   @id @default(uuid())
+  donation   Donation @relation(fields: [donationId], references: [id])
+  donationId String
+  item       Item     @relation(fields: [itemId], references: [id])
+  itemId     String
+  quantity   Int
+}
+
+enum RoleEnum {
+  ADMIN
+  USER
+}
+
+model User {
+  id       String     @id @default(uuid())
+  email    String     @unique
+  name     String
+  password String
+  cpf      String
+  phone    String
+  points   Int        @default(0)
+  cep      String?
+  role     RoleEnum   @default(USER)
+  Donation Donation[]
+}
